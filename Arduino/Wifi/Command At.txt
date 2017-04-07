@@ -1,0 +1,31 @@
+SSID:	B0i9-aHJm
+Password: 12345678
+
+Get Mac Address: 
+	AT+CIPSTAMAC?
+Set module Mode:  
+	AT+CWMODE=mode
+		mode： An integer designating the mode of operation either 1, 2, or 3.
+		1 = Station mode (client)
+		2 = AP mode (host)
+		3 = AP + Station mode (Yes, ESP8266 has a dual mode!)
+Connect to Wifi(mode = 1): 
+	AT+CWJAP="B0i9-aHJm","12345678"
+Disconnect: 
+	AT+CWQAP
+Get Ip Address: 
+	AT+CIPSTA?
+Get Ip Address:	
+	AT+CIFSR
+Send data: 
+	AT+CIPSEND=5
+Connect to Server: 
+	AT+CIPSTART=0,"TCP","192.168.4.2",8888
+	AT+CIPSTART=0,"TCP","192.168.1.2",2000
+	AT+CIPSTART="TCP","192.168.43.168",2000
+SSID of Access Point ESP8266 is connected to:
+	AT+CWJAP?
+Creat Server:
+	AT+CIPSERVER=1,8888
+Enable multiple connections or not	
+	AT+CIPMUX=1	
