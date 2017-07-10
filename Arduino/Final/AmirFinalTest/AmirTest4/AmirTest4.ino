@@ -30,7 +30,6 @@ bool Watering = false; // do watering
 bool Motor_on = false;//Motor Statues
 bool isMessage = false;
 bool getSonsors = false;
-bool startMotor = false;
 bool alreadyConnect = false; // if server is connected(CLOSED / ALREADY CONNECTED)
 bool WifiConnect = false; // if Wifi is Coonected (no ip & WIFI DISCONNECT / WIFI CONNECTED & WIFI GOT IP) 
 int turn = 0;
@@ -88,8 +87,8 @@ void setup() {
 //  dht.begin();
   Serial.begin(9600);
   delay(200);
-  Serial1.print(connectwifi);
-  delay(1500);
+  //Serial1.print(connectwifi);
+  //delay(1500);
   Serial2.print(Reset);
   delay(2000);
   Serial2.print(changemode);
@@ -227,7 +226,7 @@ void loop() {
       }
       else{
         Serial.println("Success");
-        webpage = "SUCCESS";
+        webpage = "<html><head></head><body><h2>SUCCESS</h2></body></html>";
       }
       espsend(webpage);
       delay(2000);
@@ -353,6 +352,19 @@ void loop() {
       }
       Serial.println(com);
     }
+  }
+  //-------------------------------------------------------------
+  if (Serial.available() > 0)
+  {
+    delay(1000);
+    String command = "";
+    while (Serial.available())
+    {
+      command += (char)Serial.read();
+ 
+    }
+    command.replace("%20", " ");
+    Serial2.println(command);
   }
   //-------------------------------------------------------------
   delay(10);
