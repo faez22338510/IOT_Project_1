@@ -177,17 +177,17 @@ if (timer == 2500) {
     //humidity = 20;
     soil = analogRead(A0);
       String tBuffer = "{";
-      tBuffer += "\"te\":"+(String)temp + ",";
+      tBuffer += "\"t\":"+(String)temp + ",";
       tBuffer += "\"so\":"+(String)soil + ",";
-      tBuffer += "\"hu\":"+(String)humidity + ",";
+      tBuffer += "\"h\":"+(String)humidity + ",";
       //tBuffer += (String)valf + " ";
       if (Motor_on) {
-        tBuffer += "\"Mo\":\"ON\",";
+        tBuffer += "\"M\":\"ON\",";
       }
       else {
-        tBuffer += "\"Mo\":\"OFF\",";
+        tBuffer += "\"M\":\"OFF\",";
       }
-     tBuffer += "\"no\":"+(String)notif+","; 
+     tBuffer += "\"n\":"+(String)notif+","; 
      tBuffer += "\"se\":"+"1234,"; 
      tBuffer += "\"pId\":"+"1,"; 
      tBuffer += "}";
@@ -234,17 +234,17 @@ if (timer == 2500) {
       //temp = 100;
       //humidity = 20;
       String tBuffer = "{";
-      tBuffer += "\"te\":"+(String)temp + ",";
+      tBuffer += "\"t\":"+(String)temp + ",";
       tBuffer += "\"so\":"+(String)soil + ",";
-      tBuffer += "\"hu\":"+(String)humidity + ",";
+      tBuffer += "\"h\":"+(String)humidity + ",";
       //tBuffer += (String)valf + " ";
       if (Motor_on) {
-        tBuffer += "\"Mo\":\"ON\",";
+        tBuffer += "\"M\":\"ON\",";
       }
       else {
-        tBuffer += "\"Mo\":\"OFF\",";
+        tBuffer += "\"M\":\"OFF\",";
       }
-     tBuffer += "\"no\":"+(String)notif+",";  
+     tBuffer += "\"n\":"+(String)notif+",";  
      tBuffer += "\"se\":"+"1234,"; 
      tBuffer += "\"pId\":"+"1,"; 
      tBuffer += "}";
@@ -390,7 +390,3 @@ if (timer == 2500) {
     Serial.print(timer/100);
 
 }
-
-
-
-
