@@ -3,7 +3,7 @@
 #include "DHT.h"
 
 #define Reset "AT+RST\r\n"
-#define changemode "AT+CWMODE=1\r\n"
+#define changemode "AT+CWMODE=2\r\n"
 #define setip "AT+CIPAP=\"192.168.1.1\"\r\n"
 #define multiconnect "AT+CIPMUX=1\r\n"
 #define creatserver "AT+CIPSERVER=1,80\r\n"
@@ -12,7 +12,7 @@
 #define connecting "AT+CWJAP="
 #define getipaddress "AT+CIFSR"
 #define senddata "AT+CIPSEND="
-#define connectserver "AT+CIPSTART=\"TCP\",\"192.168.1.80\",2000"
+#define connectserver "AT+CIPSTART=\"TCP\",\"192.168.43.86\",2000"
 #define Motor 3
 #define WifiDisConnect 4
 #define ServerDisConnect 5
@@ -31,6 +31,7 @@ bool Motor_on = false;//Motor Statues
 bool isMessage = false;
 bool getSonsors = false;
 bool notif = false;
+bool NextNotif = true;
 bool alreadyConnect = false; // if server is connected(CLOSED / ALREADY CONNECTED)
 bool WifiConnect = false; // if Wifi is Coonected (no ip & WIFI DISCONNECT / WIFI CONNECTED & WIFI GOT IP) 
 int turn = 0;
@@ -78,7 +79,9 @@ void setup() {
 //--------------------------------------------------------
   pinMode(Motor,OUTPUT);//3
   pinMode(WifiDisConnect, OUTPUT);//4
-  pinMode(ServerDisConnect, OUTPUT);//5  
+  pinMode(ServerDisConnect, OUTPUT);//5 
+  pinMode(7,OUTPUT);//On
+     
   Wire.begin();
   BH1750_Init(BH1750_address);
   dht.begin();
@@ -100,6 +103,7 @@ void setup() {
   Serial2.print(creatserver);
   Serial2.print(getipaddress);
   delay(1500);
+  digitalWrite(7,1);
 }
   
 void loop() {
@@ -168,9 +172,15 @@ if (timer == 2500) {
     temp = (int)dht.readTemperature(); // Air Temperature
     delay(20);
     if(temp > 40 || temp < 10 ){
-      notif = true;
+      if(NextNotif){
+        NextNotif = false;
+        notif = true;
+        isMessage = true;
+        request = "stat";
+      }
     }
     else{
+      NextNotif = true;
       notif = false;
     }
     //temp = 100;
@@ -188,8 +198,8 @@ if (timer == 2500) {
         tBuffer += "\"M\":\"OFF\",";
       }
      tBuffer += "\"n\":"+(String)notif+","; 
-     tBuffer += "\"se\":"+"1234,"; 
-     tBuffer += "\"pId\":"+"1,"; 
+     tBuffer += "\"se\":1234,"; 
+     tBuffer += "\"pId\":1"; 
      tBuffer += "}";
     Serial.println(tBuffer);
     timer = 0;
@@ -245,8 +255,8 @@ if (timer == 2500) {
         tBuffer += "\"M\":\"OFF\",";
       }
      tBuffer += "\"n\":"+(String)notif+",";  
-     tBuffer += "\"se\":"+"1234,"; 
-     tBuffer += "\"pId\":"+"1,"; 
+     tBuffer += "\"se\":1234,"; 
+     tBuffer += "\"pId\":1"; 
      tBuffer += "}";
       String lenght = senddata;
       lenght += tBuffer.length();
@@ -255,7 +265,29 @@ if (timer == 2500) {
       delay(100);
       Serial1.println(tBuffer);
     }
-    
+
+    if(request.indexOf("IL")!=-1 || request.indexOf("GOT") != -1 ||
+       request.indexOf("FA")!=-1 || request.indexOf("ECTED") != -1
+    ){
+      Serial.println("here");
+      Serial.println(connectionId);
+      String webpage;
+      if(request.indexOf("IL")!=-1 || request.indexOf("FA")!=-1){
+        Serial.println("Fail");
+        webpage = "Fail";
+      }
+      else{
+        Serial.println("Success");
+        webpage = "<html><head></head><body><h2>SUCCESS</h2></body></html>";
+      }
+      espsend(webpage);
+      delay(2000);
+      String closeCommand = "AT+CIPCLOSE=";  ////////////////close the socket connection////esp command 
+      closeCommand+=connectionId; // append connection id
+      closeCommand+="\r\n";
+      Serial2.print(closeCommand);
+    }
+    notif = false;
     isMessage = false;
     request = "";
   }
@@ -304,7 +336,7 @@ if (timer == 2500) {
       WifiConnect = true;
     }
     if(!WifiConnect){
-      digitalWrite(WifiDisConnect,1);
+      digitalWrite(WifiDisConnect,0);
       digitalWrite(ServerDisConnect,0);
     }
     else if(!alreadyConnect){
@@ -312,7 +344,7 @@ if (timer == 2500) {
       digitalWrite(ServerDisConnect,1);
     }
     else{
-      digitalWrite(WifiDisConnect,0);
+      digitalWrite(WifiDisConnect,1);
       digitalWrite(ServerDisConnect,0);
     }
     Serial.println(command);
@@ -331,7 +363,7 @@ if (timer == 2500) {
         char c = Serial2.read();
         com += (char)c;
       }
-    //sample request 192.168.1.1/ssidfaezIrancell-Z6000passfaez22338510
+    //sample request 192.168.1.1/ssidIrancell-Z6000passfaez22338510
     if(com.indexOf("ssid") != -1){
       int sid = com.lastIndexOf("ssid");
       int pas = com.lastIndexOf("pass");
@@ -389,4 +421,17 @@ if (timer == 2500) {
   if(timer%100 == 0)
     Serial.print(timer/100);
 
+}
+
+
+void espsend(String d)
+{
+   String cipSend = " AT+CIPSEND=";
+   cipSend += connectionId; 
+   cipSend += ",";
+   cipSend +=d.length();
+   cipSend +="\r\n";
+   Serial2.println(cipSend);
+   delay(100);
+   Serial2.println(d);
 }
